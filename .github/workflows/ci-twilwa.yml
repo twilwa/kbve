@@ -94,7 +94,7 @@ jobs:
                 if: needs.alter.outputs.twilwa == 'true'
                 uses: dobbelina/copy_file_to_another_repo_action@main
                 env:
-                    API_TOKEN_GITHUB: ${{ secrets.UNITY_PAT }}
+                    API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB}}
                 with:
                     source_file: 'dist/apps/twilwa/'
                     destination_repo: 'twilwa/xware-garden-v3'
