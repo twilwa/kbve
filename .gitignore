@@ -17,6 +17,9 @@ node_modules
 .settings/
 *.sublime-workspace
 
+# cache for poetry
+.cache
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
