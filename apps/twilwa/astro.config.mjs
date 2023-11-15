@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://twilwa.github.io/kbve/',
+	site: 'https://supportdate.com',
 	outDir: '../../dist/apps/twilwa',
 	integrations: [
 		react(),
