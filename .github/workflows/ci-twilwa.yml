@@ -1,0 +1,137 @@
+name: CI - twilwa
+
+on:
+    workflow_dispatch:
+    push:
+         branches:
+             - main
+
+concurrency:
+    group: "pages"
+    cancel-in-progress: true
+
+
+jobs:
+    alter:
+        runs-on: ubuntu-latest
+        name: File Alterations
+        if: github.repository == 'twilwa/kbve'
+        outputs:
+            twilwa:  ${{ steps.delta.outputs.twilwa_any_changed  }}
+            #kbve: ${{ steps.delta.outputs.kbve_all_changed_files }}
+            #rareicon: ${{ steps.delta.outputs.rareicon_all_changed_files }}
+            #discordsh: ${{ steps.delta.outputs.discordsh_all_changed_files }}
+            #atlas: ${{ steps.delta.outputs.atlas_any_changed  }}
+            # api: ${{ steps.delta.outputs.api_any_changed  }}
+           # proxy: ${{ steps.delta.outputs.proxy_any_changed  }}
+          #  saber: ${{ steps.delta.outputs.saber_any_changed  }}
+
+        steps:
+            -   name: Checkout the repository using git
+                uses: actions/checkout@v4
+                with:
+                    fetch-depth: 1
+
+            -   name: File Changes
+                id: delta
+                uses: tj-actions/changed-files@v39
+                with:
+                  files_yaml: |
+                    twilwa:
+                        - 'apps/twilwa/**'
+
+    deploy:
+        needs: alter
+        name: Deployment
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout the repository using git
+                uses: actions/checkout@v4
+
+            -   name: Setup Node v18
+                uses: actions/setup-node@v3
+                with:
+                    node-version: 18
+
+            -   name: Setup pnpm
+                uses: pnpm/action-setup@v2
+                with:
+                    version: 8
+                    run_install: false
+            #   @[CACHE]->[START]
+            -   name: Get pnpm Store
+                shell: bash
+                run: |
+                    echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            -   name: Setup pnpm Cache
+                uses: actions/cache@v3
+                with:
+                    path: ${{ env.STORE_PATH }}
+                    key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+                    restore-keys: |
+                        ${{ runner.os }}-pnpm-store-
+
+            #   @[CACHE]->[END]
+
+            -   name: Install pnpm dependencies
+                run: pnpm install
+
+            -   name: Generate NX Report
+                shell: bash
+                run: |
+                    pnpm nx report
+
+            #   [twilwa - You will have to rename this]
+
+            -   name: twilwa -> Build
+                if: needs.alter.outputs.twilwa == 'true'
+                shell: bash
+                run: |
+                    pnpm nx build twilwa
+
+            -   name: twilwa -> Deployment
+                if: needs.alter.outputs.twilwa == 'true'
+                uses: dobbelina/copy_file_to_another_repo_action@main
+                env:
+                    API_TOKEN_GITHUB: ${{ secrets.UNITY_PAT }}
+                with:
+                    source_file: 'dist/apps/twilwa/'
+                    destination_repo: 'twilwa/xware-garden-v3'
+                    destination_folder: '/docs'
+                    destination_branch: 'main'
+                    destination_branch_create: 'patch-xware-deploy'
+                    user_email: '111034762+twilwa@users.noreply.github.com.'
+                    user_name: 'twilwa'
+                    commit_message: ${{ github.event.head_commit.message }}
+                    rsync_option: "-avrh --delete"
+
+
+
+            #   [ATLAS]
+
+           #
+
+
+
+    # pypublish:
+    #     needs: ["deploy", "alter"]
+    #     name: Pypi Publish
+    #     if: needs.alter.outputs.atlas == 'true'
+    #     runs-on: ubuntu-latest
+    #     environment:
+    #         name: pypi
+    #         url: https://pypi.org/p/kbve
+    #     permissions:
+    #         id-token: write
+    #     steps:
+    #         -   name: Download all the dists
+    #             uses: actions/download-artifact@v3
+    #             with:
+    #                 name: atlas-python-package-distributions
+    #                 path: dist/
+    #         -   name: Publish distribution 📦 to PyPI
+    #             uses: pypa/gh-action-pypi-publish@release/v1
+    #             with:
+    #                 user: __token__
+    #                 password: ${{ secrets.PYPI_API_TOKEN }}
