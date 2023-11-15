@@ -17,7 +17,7 @@ node_modules
 .settings/
 *.sublime-workspace
 
-# cache for poetry
+#poetry cache
 .cache
 
 # IDE - VSCode
