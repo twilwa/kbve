@@ -44,7 +44,16 @@ public class Player : Entity
   {
     this.Type = EntityType.Player;
     base.Initialization();
+    base.InitializeEntityCanvas(new Vector3(0, 1f, 0));
+    base.InitializeHealthBar(new Vector2(0, 0));
+    base.InitializeEnergyBar(new Vector2(0, -0.3f));
+
     PlayerDebug();
+  }
+
+  protected virtual void LateUpdate()
+  {
+    base.FlipCanvas();
   }
 
 

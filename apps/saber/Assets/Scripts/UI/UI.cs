@@ -1,7 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-
 
 public class UI
 {
@@ -18,11 +17,10 @@ public class UI
     canvasGameObject.transform.localPosition = offset;
     canvasGameObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f); // Adjust as necessary
 
-
     return canvas;
   }
 
-  public static Image CreateBar(
+  public static (Image barImage, TextMeshProUGUI barText) CreateBar(
     Canvas parentCanvas,
     string name,
     Color color,
@@ -46,7 +44,7 @@ public class UI
     textGO.transform.SetParent(barGameObject.transform, false);
     textGO.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
     // textGO.transform.localRotation = Quaternion.Euler(0, 180, 0);
-    if(rotateText)
+    if (rotateText)
     {
       textGO.transform.localRotation = Quaternion.Euler(0, 180, 0);
     }
@@ -67,7 +65,22 @@ public class UI
     textRT.anchorMax = new Vector2(0.5f, 0.5f); // Center anchor
     textRT.pivot = new Vector2(0.5f, 0.5f); // Center pivot
 
+    return (barImage, barText);
+  }
 
-    return barImage;
+  public static void UpdateStatsBar(
+    int currentStat,
+    int maxStat,
+    Image statBarImage,
+    TextMeshProUGUI statBarText
+  )
+  {
+    float fillAmount = (maxStat != 0) ? (float)currentStat / maxStat : 0;
+    statBarImage.fillAmount = fillAmount;
+
+    if (statBarText != null)
+    {
+      statBarText.text = currentStat + " / " + maxStat;
+    }
   }
 }
