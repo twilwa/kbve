@@ -6,10 +6,14 @@ on:
          branches:
              - main
 
+
 concurrency:
     group: "pages"
     cancel-in-progress: true
 
+env:
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository }}
 
 jobs:
     alter:
@@ -25,6 +29,7 @@ jobs:
             api: ${{ steps.delta.outputs.api_any_changed  }}
             proxy: ${{ steps.delta.outputs.proxy_any_changed  }}
             saber: ${{ steps.delta.outputs.saber_any_changed  }}
+            rustprofile:  ${{ steps.delta.outputs.rustprofile_any_changed  }}
 
         steps:
             -   name: Checkout the repository using git
@@ -53,10 +58,12 @@ jobs:
                         - 'apps/proxy/**'
                     saber:
                         - 'apps/saber/**'
+                    rustprofile:
+                        - 'apps/rust_api_profile/**'
 
 
     deploy:
-        needs: alter
+        needs: ["alter"]
         name: Deployment
         runs-on: ubuntu-latest
         steps:
@@ -171,3 +178,100 @@ jobs:
                 with:
                     user: __token__
                     password: ${{ secrets.PYPI_API_TOKEN }}
+
+    # Monorepo Image from https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+    monorepo-image:
+        needs: ["deploy"]
+        name: Build Monorepo Docker Image
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+              - name: Checkout Repository
+                uses: actions/checkout@v4
+
+              - name: Set up QEMU
+                uses: docker/setup-qemu-action@v3
+
+              - name: Set up Docker Buildx
+                uses: docker/setup-buildx-action@v3
+
+              - name: Login to Docker Hub
+                uses: docker/login-action@v3
+                with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+              - name: Log in to the Container registry
+                uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+                with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+              - name: Extract metadata (tags, labels) for Docker
+                id: meta
+                uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+                with:
+                    images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+              - name: Build and push Docker image
+                uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+                with:
+                      context: .
+                      platforms: linux/amd64,linux/arm64
+                      push: true
+                      tags: ${{ steps.meta.outputs.tags }}
+                      labels: ${{ steps.meta.outputs.labels }}
+
+    # Rust Profile Image Deployment
+    rust-profile-image:
+        needs: ["monorepo-image", "alter"]
+        name: Build Rust Profile Docker Image
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+              - name: Checkout Repository
+                uses: actions/checkout@v4
+
+              - name: Set up QEMU
+                uses: docker/setup-qemu-action@v3
+
+              - name: Set up Docker Buildx
+                uses: docker/setup-buildx-action@v3
+
+              - name: Login to Docker Hub
+                uses: docker/login-action@v3
+                with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+              - name: Build and push
+                uses: docker/build-push-action@v5
+                with:
+                    context: ./apps/rust_api_profile/
+                    push: true
+                    tags: kbve/rustprofile:latest
+                    platforms: linux/amd64, linux/arm64
+                    file: ./apps/rust_api_profile/Dockerfile
+
+    # Deploy Rust Profile Image
+    deploy-rust-profile-image:
+        needs: ["rust-profile-image", "alter"]
+        name: Deploy Rust Profile Docker Image to Portainer
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Repository
+                uses: actions/checkout@v4
+
+            -   name: Deploy to Portainer
+                uses: datntdev0/action-deploy-to-portainer@v0.1.0
+                with:
+                    portainerHost: ${{ secrets.PORTAINER_HOST }}
+                    portainerApiKey: ${{ secrets.PORTAINER_API_KEY }}
+                    portainerEnvId: ${{ secrets.PORTAINER_ENV_ID }}
+                    portainerStackName: 'my-rust-profile'
+                    portainerFilePath: './apps/rust_api_profile/docker-compose.yml'

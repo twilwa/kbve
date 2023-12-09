@@ -1,25 +1,27 @@
-///*	Ꮤ𐌄 𐌋Ꝋᕓ𐌄 𐌂𐌀𐌔𐌕𐌉𐌍Ᏽ 𐌔𐌐𐌄𐌋𐌋𐌔	
+///*	!h Ꮤ𐌄 𐌋Ꝋᕓ𐌄 𐌂𐌀𐌔𐌕𐌉𐌍Ᏽ ℜǕ𐌔Ṫ
 use std::sync::Arc;
 use std::time::Instant;
 use axum::{ http::StatusCode, extract::Extension, response::Json };
-use serde::Serialize;
 use diesel::prelude::*;
 use tokio;
 use tokio::task;
+use crate::wh::{WizardResponse};
 use crate::db::Pool;
+use serde_json::{Value, json};
 
-#[derive(Serialize)]
-pub struct SpeedTestResponse {
-	response_time_ms: u64,
-}
 
-#[derive(Serialize)]
-pub struct HealthCheckResponse {
-	status: String,
+
+pub async fn root_endpoint() -> Result<Json<WizardResponse>, StatusCode> {
+	Ok(
+		Json(WizardResponse {
+			data: serde_json::json!({"status": "online"}),
+			message: serde_json::json!({"root": "endpoint"}),
+		})
+	)
 }
 
 pub async fn health_check(Extension(pool): Extension<Arc<Pool>>) -> Result<
-	Json<HealthCheckResponse>,
+	Json<WizardResponse>,
 	StatusCode
 > {
 	let connection_result = task::spawn_blocking(move || { pool.get() }).await;
@@ -27,8 +29,9 @@ pub async fn health_check(Extension(pool): Extension<Arc<Pool>>) -> Result<
 	match connection_result {
 		Ok(Ok(_conn)) => {
 			Ok(
-				Json(HealthCheckResponse {
-					status: "OK".to_string(),
+				Json(WizardResponse {
+					data: serde_json::json!({"status": "online"}),
+					message: serde_json::json!({"health": "ok"}),
 				})
 			)
 		}
@@ -39,7 +42,7 @@ pub async fn health_check(Extension(pool): Extension<Arc<Pool>>) -> Result<
 
 
 pub async fn speed_test(Extension(pool): Extension<Arc<Pool>>) -> Result<
-	Json<SpeedTestResponse>,
+	Json<WizardResponse>,
 	StatusCode
 > {
 	let start_time = Instant::now();
@@ -57,10 +60,11 @@ pub async fn speed_test(Extension(pool): Extension<Arc<Pool>>) -> Result<
 
 	match query_result {
 		Ok(_) => {
-			let elapsed_time = start_time.elapsed();
+			let elapsed_time = start_time.elapsed().as_millis() as u64;
 			Ok(
-				Json(SpeedTestResponse {
-					response_time_ms: elapsed_time.as_millis() as u64, // Response time in milliseconds
+				Json(WizardResponse {
+					data: serde_json::json!({"status": "time"}),
+					message: serde_json::json!({"time": elapsed_time.to_string()}), 
 				})
 			)
 		}
