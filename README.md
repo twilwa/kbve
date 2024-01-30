@@ -1,7 +1,9 @@
 # KBVE
 
 ![Discord](https://img.shields.io/discord/342732838598082562?logo=discord)
-![PyPI - Version](https://img.shields.io/pypi/v/kbve)
+[![PyPI - Version](https://img.shields.io/pypi/v/kbve)](https://pypi.org/project/kbve/)
+[![Crates.io Version](https://img.shields.io/crates/v/erust?label=erust%20crates.io)](https://crates.io/crates/erust)
+
 
 <a alt="KBVE Logo" href="https://kbve.com/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/KBVE/kbve.com/main/public/assets/img/kbve.png" width="200"></a>
 
@@ -9,8 +11,107 @@
 
 ## What is KBVE?
 
-KBVE is a collective that builds different programs, libraries and games!
-This monorepo is the heart of all our applications, making it easier to manage.
+KBVE is a collective that builds different programs, libraries, games and memes!
+This monorepo is the heart of all our applications, making it easier to manage and provides an experimental playground for pipelines.
+The core of this Monorepo is based upon [Nx Smart Monorepos](https://nx.dev/) and database is provided by [PlanetScale](https://planetscale.com/)
+
+
+* * *
+
+## CARP STACK
+
+> cRap , pronounced, Ceee-Rap. 💩 ... uhh wait I meant to say carp. 🐟
+
+- C
+  - [saber](https://github.com/KBVE/kbve/tree/main/apps/saber)
+    - Unity | v2022.3.12f1
+      - `dev` has a playable build on [Itch.io - Saber Dev](https://kbve.itch.io/dev-saber)
+        - The monorepo builds and ships the `dev`-branch build to Itch.io
+      - TODO: Interoptopus for rust bindings.
+    - Blazor
+      - WIP: Waiting on Net 8.0 integration.
+    - Steam Pipeline:
+      - TODO: Building Pipeline after adding a new `beta` branch to the CI/CD pipeline.
+
+  - [pandaplayground](https://github.com/KBVE/kbve/tree/main/apps/kbve.com/public/data/c/graveyard/panda)
+    - Generic `C` playground
+    - Extremely WIP with submodules removed by default.
+
+
+- R for Rust
+  - `kbve`
+    - Axum
+      - Prebuilt Axum routes for the KBVE backend.
+    - Diesel
+      - Database ORM for managing the types.
+    - TODO: Crates.io Release
+
+  - [erust](https://crates.io/crates/erust) | v0.1 dev.
+    - Egui
+      - A components library that extends out `egui` & `eframe`.
+    - Rust [Crates.io Package Source](https://github.com/KBVE/kbve/tree/main/packages/erust)
+
+- A for Astro
+  - [AstroVE](https://github.com/KBVE/kbve/tree/main/packages/astro-ve/)
+    - Astro Components Library
+    - TODO: NPM Release
+    - React
+      - TODO: Migrate out additional React Components.
+    - Svelte
+      - TODO: Refactor the Svelte Components.
+
+  - [KhashVault](https://github.com/KBVE/kbve/tree/main/packages/khashvault/)
+    - Typescript JS Library
+    - TODO: `engine.ts` - Integrating Axum (`kbve`) backend with frontend libraries.
+    - TODO: NPM Release
+
+  - React - SKIP
+  - Svelte - SKIP
+  - NAPI 
+    - Rust Bindings
+
+- P for Python
+  - This part of the stack is under massive development, so we advise to skip this until we get the bindings sorted.
+  - `Atlas` under [kbve pip package](https://pypi.org/project/kbve/)
+    - TODO: Full `atlas` refactor with `autogen` and `taskweaver`.
+
+  - Pyo3
+    - Rust Bindings
+  
+  - Interoptopus 
+    - Rust Bindings
+
+* * *
+
+## DEVOPS STACK
+
+The Richard Stack is known as `Dockerized Integrated Container Kubes`.
+
+- D for [Docker](https://kbve.com/application/docker/)
+  - Swarm
+    - Docker Swarm for Stateful Applications.
+  - Portainer
+    - We use [Portainer](https://kbve.com/application/portainer/) for Docker/K8s management.
+  - KBVE Docker Images via [Hub](https://hub.docker.com/u/kbve)
+    - [kbve:rustprofile](https://hub.docker.com/r/kbve/rustprofile)
+  
+- I for Integrations
+  - Github Actions
+    - We use GHA to help build the docker images for x86 and ARM.
+  - GitLab
+    - We use a private GitLab for `private` codebase projects.
+
+- C for Containers
+  - [Proxmox](https://kbve.com/application/proxmox/)
+    - qEMU
+      - The QEMU handles running our docker swarm and k8s.
+    - LXD
+
+- K for Kubes
+  - [Kubernetes](https://kbve.com/application/kubernetes/)
+    - `k` for Stateless Applications.
+
+* * *
 
 Examples of monorepos:
 
@@ -34,6 +135,8 @@ Perks of a monorepo include:
 
 - Scalable.
   - Modern monorepo build tools and practices are designed to scale, even as the number of projects and developers grows.
+
+* * *
 
 ### Install
 
@@ -85,7 +188,7 @@ Running the micro controllers for the Rust API is easy!
 
 ### Apps
 
-HerbMail.com
-KBVE.com
-RareIcon.com
-Discord.sh
+- HerbMail.com
+- KBVE.com
+- RareIcon.com
+- Discord.sh
