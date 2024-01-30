@@ -3,12 +3,15 @@
 diesel::table! {
     apikey (id) {
         id -> Unsigned<Bigint>,
-        uuid -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
         permissions -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         keyhash -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         label -> Varchar,
     }
 }
@@ -16,13 +19,16 @@ diesel::table! {
 diesel::table! {
     appwrite (id) {
         id -> Unsigned<Bigint>,
-        uuid -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
         appwrite_endpoint -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         appwrite_projectid -> Varchar,
-        #[max_length = 256]
-        apppwrite_api_key -> Varchar,
+        #[max_length = 255]
+        appwrite_api_key -> Varchar,
         #[max_length = 64]
         version -> Varchar,
         created_at -> Timestamp,
@@ -32,40 +38,56 @@ diesel::table! {
 diesel::table! {
     auth (id) {
         id -> Unsigned<Bigint>,
-        uuid -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
         email -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         hash -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         salt -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         password_reset_token -> Varchar,
         password_reset_expiry -> Timestamp,
-        #[max_length = 256]
+        #[max_length = 255]
         verification_token -> Varchar,
         verification_expiry -> Timestamp,
         status -> Integer,
         last_login_at -> Timestamp,
         failed_login_attempts -> Integer,
         lockout_until -> Timestamp,
-        #[max_length = 256]
+        #[max_length = 255]
         two_factor_secret -> Varchar,
         recovery_codes -> Text,
     }
 }
 
 diesel::table! {
+    globals (id) {
+        id -> Unsigned<Bigint>,
+        #[max_length = 255]
+        key -> Varchar,
+        #[max_length = 255]
+        value -> Varchar,
+    }
+}
+
+diesel::table! {
     n8n (id) {
         id -> Unsigned<Bigint>,
-        uuid -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
         webhook -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         permissions -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         keyhash -> Varchar,
-        #[max_length = 256]
+        #[max_length = 255]
         label -> Varchar,
     }
 }
@@ -73,7 +95,9 @@ diesel::table! {
 diesel::table! {
     profile (id) {
         id -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 255]
         name -> Varchar,
         #[max_length = 64]
         bio -> Varchar,
@@ -85,14 +109,31 @@ diesel::table! {
         instagram -> Varchar,
         #[max_length = 64]
         discord -> Varchar,
-        uuid -> Unsigned<Bigint>,
+        #[max_length = 16]
+        userid -> Binary,
+    }
+}
+
+diesel::table! {
+    settings (id) {
+        id -> Unsigned<Bigint>,
+        #[max_length = 16]
+        ulid -> Binary,
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
+        key -> Varchar,
+        #[max_length = 255]
+        value -> Varchar,
     }
 }
 
 diesel::table! {
     users (id) {
         id -> Unsigned<Bigint>,
-        #[max_length = 256]
+        #[max_length = 16]
+        userid -> Binary,
+        #[max_length = 255]
         username -> Varchar,
         role -> Integer,
         reputation -> Integer,
@@ -105,7 +146,9 @@ diesel::allow_tables_to_appear_in_same_query!(
     apikey,
     appwrite,
     auth,
+    globals,
     n8n,
     profile,
+    settings,
     users,
 );

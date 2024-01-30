@@ -4,6 +4,9 @@ resolver = '2'
 members = [
 	'apps/rust_api_profile',
 	'packages/kbve',
+	'packages/erust',
+	'apps/rust_wasm_embed',
+	'packages/holy',
 ]
 
 [profile.release]

@@ -2,34 +2,41 @@
 
 #![allow(unused)]
 #![allow(clippy::all)]
+use diesel::prelude::*;
+use serde::{ Serialize, Deserialize};
 
-use diesel::Queryable;
-use serde::Serialize;
+
 use chrono::NaiveDateTime;
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = apikey)]
 pub struct Apikey {
     pub id: u64,
-    pub uuid: u64,
+    pub ulid: Vec<u8>,
+    pub userid: Vec<u8>,
     pub permissions: String,
     pub keyhash: String,
     pub label: String,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = appwrite)]
 pub struct Appwrite {
     pub id: u64,
-    pub uuid: u64,
+    pub ulid: Vec<u8>,
+    pub userid: Vec<u8>,
     pub appwrite_endpoint: String,
     pub appwrite_projectid: String,
-    pub apppwrite_api_key: String,
+    pub appwrite_api_key: String,
     pub version: String,
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = auth)]
 pub struct Auth {
     pub id: u64,
-    pub uuid: u64,
+    pub ulid: Vec<u8>,
+    pub userid: Vec<u8>,
     pub email: String,
     pub hash: String,
     pub salt: String,
@@ -45,31 +52,55 @@ pub struct Auth {
     pub recovery_codes: String,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = globals)]
+pub struct Global {
+    pub id: u64,
+    pub key: String,
+    pub value: String,
+}
+
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = n8n)]
 pub struct N8n {
     pub id: u64,
-    pub uuid: u64,
+    pub ulid: Vec<u8>,
+    pub userid: Vec<u8>,
     pub webhook: String,
     pub permissions: String,
     pub keyhash: String,
     pub label: String,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = profile)]
 pub struct Profile {
     pub id: u64,
+    pub ulid: Vec<u8>,
     pub name: String,
     pub bio: String,
     pub unsplash: String,
     pub github: String,
     pub instagram: String,
     pub discord: String,
-    pub uuid: u64,
+    pub userid: Vec<u8>,
 }
 
-#[derive(Queryable, Debug, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = settings)]
+pub struct Setting {
+    pub id: u64,
+    pub ulid: Vec<u8>,
+    pub userid: Vec<u8>,
+    pub key: String,
+    pub value: String,
+}
+
+#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[diesel(table_name = users)]
 pub struct User {
     pub id: u64,
+    pub userid: Vec<u8>,
     pub username: String,
     pub role: i32,
     pub reputation: i32,

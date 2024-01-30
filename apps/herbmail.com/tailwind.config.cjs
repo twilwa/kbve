@@ -19,8 +19,13 @@ module.exports = {
         'kbve':  '#8C52FF',
       
         'kbve-primary':  "#48BB78",
+        'kbve-primary-light': "#48BB78",
         
         'kbve-secondary': "#1c033c",
+
+        'kbve-menu-primary': "#27272A",
+
+        
         
       },
       backgroundColor: {
