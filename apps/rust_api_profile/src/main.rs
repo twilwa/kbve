@@ -12,9 +12,13 @@ use tokio;
 use kbve::{
 	db::{ self },
 	authentication::{ graceful },
-	utility::{ cors_service, fallback, global_map_init, health_check, speed_test, root_endpoint },
-	runes::{  GLOBAL, }
+	utility::{ cors_service, fallback, global_map_init, root_endpoint },
+	runes::{ GLOBAL },
+	entity::{ KbveState },
+	session::{ middleware_jwt },
 };
+
+use jedi::builder::ValidatorBuilder;
 
 #[tokio::main]
 async fn main() {
@@ -23,6 +27,17 @@ async fn main() {
 	let pool = db::establish_connection_pool();
 	let shared_pool = Arc::new(pool);
 	//let api_session_store = Arc::new(APISessionStore::new());
+
+	let validator_builder = ValidatorBuilder::<String, String>::new();
+	let shared_validator_builder = Arc::new(validator_builder);
+
+	// Create KbveState
+	let kbve_state = KbveState::new(
+		shared_pool.clone(),
+		shared_validator_builder
+	);
+
+	let application_state = Arc::new(kbve_state);
 
 	match global_map_init(shared_pool.clone()).await {
 		Ok(map) => {
@@ -35,8 +50,11 @@ async fn main() {
 	let corslight = cors_service();
 
 	let api_routes = Router::new()
-		.route("/health", get(health_check))
-		.route("/speed", get(speed_test))
+		.route("/health", get(kbve::sys::system_health_check))
+		.route("/svg", get(kbve::entity::svg_handler))
+		.route("/jedi", get(kbve::entity::jedi_controller))
+		.route("/sheet/:character", get(kbve::entity::sheet_controller))
+		.route("/speed", get(kbve::sys::system_database_speed_test))
 		.route(
 			"/graceful/profile",
 			get(kbve::authentication::graceful_jwt_profile).route_layer(
@@ -55,6 +73,26 @@ async fn main() {
 				middleware::from_fn_with_state(shared_pool.clone(), graceful)
 			)
 		)
+		//	! Character Creation
+		.route(
+			"/auth/character-creation",
+			post(kbve::entity::character_creation_handler).route_layer(
+				middleware::from_fn_with_state(
+					shared_pool.clone(),
+					middleware_jwt
+				)
+			)
+		)
+		//	! Character List
+		.route(
+			"/auth/characters",
+			get(kbve::entity::authorized_character_data_to_json).route_layer(
+				middleware::from_fn_with_state(
+					shared_pool.clone(),
+					middleware_jwt
+				)
+			)
+		)
 		.route(
 			"/shieldwall/:action",
 			get(kbve::authentication::shieldwall_action).route_layer(
@@ -63,11 +101,14 @@ async fn main() {
 		)
 
 		.route("/auth/logout", get(kbve::authentication::auth_logout))
-		.route("/auth/register", post(kbve::authentication::auth_player_register))
+		.route(
+			"/auth/register",
+			post(kbve::authentication::auth_player_register)
+		)
 		.route("/auth/login", post(kbve::authentication::auth_player_login))
 
 		.layer(Extension(shared_pool.clone()));
-		//.layer(Extension(api_session_store));
+	//.layer(Extension(api_session_store));
 
 	// ?	Future v2 -> Panda
 
@@ -78,9 +119,10 @@ async fn main() {
 		.nest("/api/v2", apipanda_routes)
 		.route("/", get(root_endpoint))
 		.layer(Extension(shared_pool.clone()))
+		.layer(Extension(application_state))
 		.layer(corslight)
-		.fallback(fallback)
-		.with_state(shared_pool);
+		.fallback(fallback);
+	//.with_state(shared_pool);
 
 	axum::Server
 		::bind(&"0.0.0.0:3000".parse().unwrap())
