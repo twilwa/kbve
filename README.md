@@ -18,6 +18,16 @@ The core of this Monorepo is based upon [Nx Smart Monorepos](https://nx.dev/)
 
 * * *
 
+| C     	| R     	| A        	| P    	| @Apps   	            |
+|-------	|-------	|----------	|------	|---------------------- |
+| saber 	| erust 	| astro-ve 	| kbve 	| kbve.com	            |
+|       	| jedi  	|          	|      	| rentearth.com      	  |
+|       	| holy  	|          	|      	| TODO Steam App        |
+|         | kbve    |           |       | TODO Android App      |
+
+* * *
+
+
 ## CARP STACK
 
 > cRap , pronounced, Ceee-Rap. 💩 ... uhh wait I meant to say carp. 🐟
@@ -142,6 +152,8 @@ Perks of a monorepo include:
 
 Before getting started, we recommend that you use WSL, Linux or MacOS! Direct Windows is not supported.
 Make sure you have Node 18+ with PNPM! Python 3.10+ / Poetry are optional if you wish to work with python.
+
+Please see [./CONTRIBUTE.md](./CONTRIBUTE.md) for WSL Instructions
 
 #### Git
 

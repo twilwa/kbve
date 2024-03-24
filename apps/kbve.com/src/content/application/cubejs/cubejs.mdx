@@ -5,6 +5,7 @@ client: Self
 frontpage: false
 slug: cubejs
 publishDate: 2022-10-22 00:00:00
+unsplash: 1635492491273-455af7728453
 img: https://images.unsplash.com/photo-1635492491273-455af7728453?fit=crop&w=1400&h=700&q=75
 description: CubeJS is a headless business intelligence application for various forms of data, including SQL, Mongo and Snowflake. CubeJS can be extended to external data warehouses, such as, Google BigQuery, Amazon Athena and Presto.
 tags:
@@ -13,6 +14,11 @@ tags:
     - sql
     - cloud
 ---
+
+import MDXJS from '../../../components/MDXJS.astro';
+
+
+<MDXJS>
 
 ## Information
 
@@ -23,7 +29,12 @@ CubeJS supports REST, SQL, and GraphQL APIs, so you can choose the best option f
 CubeJS also integrates seamlessly with popular data visualization tools, such as D3.js, Google Charts, Highcharts, and more.
 This documentation will have plenty of tutorials, examples, and demos that will help you get started and inspired.
 
+
+</MDXJS>
+
 ---
+
+<MDXJS>
 
 ## Install
 
@@ -99,7 +110,12 @@ yarn dev
 This will start your CubeJS test case server on `http://localhost:4000`.
 You can then open this URL in your browser and follow the instructions to connect to your data source and start building your data model and queries.
 
+
+</MDXJS>
+
 ---
+
+<MDXJS>
 
 ## Update
 
@@ -131,5 +147,7 @@ npm update @cubejs-backend/server
 ```shell
 yarn upgrade @cubejs-backend/server
 ```
+
+</MDXJS>
 
 ---

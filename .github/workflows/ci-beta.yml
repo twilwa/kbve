@@ -40,6 +40,9 @@ jobs:
         if: github.repository == 'kbve/kbve'
         outputs:
             rustwasmembed: ${{ steps.delta.outputs.rustwasmembed_any_changed }}
+            reactfishchip: ${{ steps.delta.outputs.reactfishchip_any_changed }}
+            reacttravelbox: ${{ steps.delta.outputs.reacttravelbox_any_changed }}
+
 
         steps:
             -   name: Checkout the repository using git
@@ -54,10 +57,14 @@ jobs:
                   files_yaml: |
                       rustwasmembed:
                           - 'apps/rust_wasm_embed/src/**'
+                      reactfishchip:
+                          - 'apps/react-phaser-fish-chip/src/**'
+                      reacttravelbox:
+                          - 'apps/react-phaser-travelbox/src/**'
                 
     deploy:
         needs: alter
-        name: "Processing Rust WASM Embed"
+        name: "Processing Embed Builds and Pipeline"
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout the repository using git
@@ -125,6 +132,29 @@ jobs:
 
             
 
-            
+            #   [React] -> Fish & Chip
 
+            -   name: React Fish & Chip
+                if: needs.alter.outputs.reactfishchip == 'true'
+                uses: ./.github/actions/kbve-shell
+                with:
+                    flag: '-build react-phaser-fish-chip'
+                    create_pull_request: true
+                    github_token: ${{ secrets.GITHUB_TOKEN }}
+                    pull_request_title: 'react-fish-chip-built-request'
+                    pull_request_body: 'React Fish and Chip Built Request'
+                
+                    
+            #   [React] -> Travel Box
+
+            -   name: React Travel Box
+                if: needs.alter.outputs.reacttravelbox == 'true'
+                uses: ./.github/actions/kbve-shell
+                with:
+                    flag: '-build react-phaser-travelbox'
+                    create_pull_request: true
+                    github_token: ${{ secrets.GITHUB_TOKEN }}
+                    pull_request_title: 'react-travelbox-built-request'
+                    pull_request_body: 'React TravelBox Built Request'
             
+            #  []
