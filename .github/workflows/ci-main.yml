@@ -34,6 +34,7 @@ jobs:
             holy: ${{ steps.delta.outputs.holy_any_changed  }}
             kbvecrate: ${{ steps.delta.outputs.kbvecrate_any_changed }}
             jedi: ${{ steps.delta.outputs.jedi_any_changed }}
+            expresscolyseusdiscord: ${{ steps.delta.outputs.expresscolyseusdiscord_any_change }}
 
         steps:
             -   name: Checkout the repository using git
@@ -72,6 +73,9 @@ jobs:
                         - 'packages/kbve/src/**'
                     jedi:
                         - 'packages/jedi/src/**'
+                    expresscolyseusdiscord:
+                        - 'apps/express-colyseus-discord/**'
+
 
 
     deploy:
@@ -126,6 +130,30 @@ jobs:
 
             #   @[NX] -> [REPORT] -> [END]
 
+            #   [KBVE.com]
+
+            -   name: KBVE.com -> Build
+                shell: bash
+                run: |
+                    pnpm nx build kbve.com
+
+            -   name: KBVE.com -> Deployment
+                uses: dobbelina/copy_file_to_another_repo_action@main
+                env:
+                    API_TOKEN_GITHUB: ${{ secrets.UNITY_PAT }}
+                with:
+                    source_file: 'dist/apps/kbve.com/'
+                    destination_repo: 'kbve/kbve.com'
+                    destination_folder: '/docs'
+                    destination_branch: 'dev'
+                    destination_branch_create: 'patch-kbve-deploy'
+                    user_email: '5599058+h0lybyte@users.noreply.github.com'
+                    user_name: 'h0lybyte'
+                    commit_message: ${{ github.event.head_commit.message }}
+                    rsync_option: "-avrh --delete"
+
+
+
             #   [HerbMail]
 
             -   name: HerbMail -> Build
@@ -133,6 +161,8 @@ jobs:
                 shell: bash
                 run: |
                     pnpm nx build herbmail.com
+
+            
 
             -   name: HerbMail -> Deployment
                 if: needs.alter.outputs.herbmail == 'true'
@@ -149,7 +179,6 @@ jobs:
                     user_name: 'h0lybyte'
                     commit_message: ${{ github.event.head_commit.message }}
                     rsync_option: "-avrh --delete"
-
 
 
             #   [ATLAS]
@@ -381,7 +410,8 @@ jobs:
                 uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
                 with:
                       context: .
-                      platforms: linux/amd64, linux/arm64
+                      # platforms: linux/amd64, linux/arm64
+                      platforms: linux/amd64
                       push: true
                       tags: ${{ steps.meta.outputs.tags }}
                       labels: ${{ steps.meta.outputs.labels }}
@@ -392,6 +422,7 @@ jobs:
     rust-profile-image:
         needs: ["monorepo-image", "alter"]
         name: Build Rust Profile Docker Image
+        if: needs.alter.outputs.rustprofile == 'true'
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -418,8 +449,8 @@ jobs:
                     context: ./apps/rust_api_profile/
                     push: true
                     tags: kbve/rustprofile:latest
-                    platforms: linux/amd64, linux/arm64
-                    #platforms: linux/amd64
+                    #platforms: linux/amd64, linux/arm64
+                    platforms: linux/amd64
                     file: ./apps/rust_api_profile/Dockerfile
                     cache-from: type=gha
                     cache-to: type=gha,mode=max
@@ -478,3 +509,44 @@ jobs:
                     cache-from: type=gha
                     cache-to: type=gha,mode=max
 
+    
+    # NodeJS
+
+    # Rust Profile Image Deployment
+    node-express-colyseus-image:
+        needs: ["monorepo-image", "alter"]
+        name: Build Node Express Colyseus Image
+        if: needs.alter.outputs.expresscolyseusdiscord == 'true'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+              - name: Checkout Repository
+                uses: actions/checkout@v4
+
+              - name: Set up QEMU
+                uses: docker/setup-qemu-action@v3
+
+              - name: Set up Docker Buildx
+                uses: docker/setup-buildx-action@v3
+
+              - name: Login to Docker Hub
+                uses: docker/login-action@v3
+                with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+              - name: Build and push
+                uses: docker/build-push-action@v5
+                with:
+                    context: ./apps/express-colyseus-discord/
+                    push: true
+                    tags: kbve/expresscolyseusdiscord:latest
+                    #platforms: linux/amd64, linux/arm64
+                    platforms: linux/amd64
+                    file: ./apps/express-colyseus-discord/Dockerfile
+                    cache-from: type=gha
+                    cache-to: type=gha,mode=max
+                    #cache-from: type=registry,ref=kbve/rustprofile:buildcache
+                    #cache-to: type=registry,ref=kbve/rustprofile:buildcache,mode=max

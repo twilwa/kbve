@@ -38,7 +38,7 @@ cleanup_directory() {
 # Function to move files from /apps/rust_wasm_embed/dist/ to /apps/herbmail.com/public/embed/rust
 move_files() {
     echo "Moving files from ./apps/rust_wasm_embed/dist/ to ./apps/herbmail.com/public/embed/rust"
-    mv ./apps/rust_wasm_embed/dist/* ./apps/herbmail.com/public/embed/rust/ || return $ERR_MOVE_FAIL
+    cp -rf ./apps/rust_wasm_embed/dist/* ./apps/herbmail.com/public/embed/rust/ || return $ERR_MOVE_FAIL
 }
 
 # Function to extract SRI hashes and WASM file names from index.html

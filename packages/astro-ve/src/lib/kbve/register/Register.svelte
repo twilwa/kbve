@@ -49,7 +49,7 @@
 	// Exporting variables and setting their initial values.
 	export let domain: string = ''; // Exporting 'domain'
 	export let className: string = ''; // Exporting 'className', wrapping the section tag.
-	export let redirect: boolean = false; // Exporting 'redirect', initially set to false.
+	export const redirect: boolean = false; // Exporting 'redirect', initially set to false.
 	export let sitekey: string = kbve.hcaptcha_site_key; // Exporting 'sitekey', initially set from 'kbve' module.
 	export let apihost: string = kbve.hcaptcha_api; // Exporting 'apihost', initially set from 'kbve' module.
 	export let hl: string = ''; // Exporting 'hl' (language code), initially empty.
@@ -270,7 +270,7 @@
 
 <section class={className}>
 	<form
-		class="space-y-4 md:space-y-6"
+		class="space-y-4"
 		action="#"
 		on:submit|preventDefault={handleRegister}>
 		<div>
